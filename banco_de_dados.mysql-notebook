@@ -1,0 +1,284 @@
+{
+    "type": "MySQLNotebook",
+    "version": "1.0",
+    "caption": "DB Notebook",
+    "content": "\\about\n-- ===============================\n-- CRIAÇÃO DO BANCO DE DADOS\n-- ===============================\nCREATE DATABASE IF NOT EXISTS posto_de_combustivel;\nUSE posto_de_combustivel;\n\n-- ===============================\n-- TABELA: USUÁRIOS\n-- ===============================\nCREATE TABLE usuarios (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n\n    usuario VARCHAR(50) NOT NULL UNIQUE,\n    senha VARCHAR(255) NOT NULL,\n\n    nome VARCHAR(100) NOT NULL,\n    cargo VARCHAR(50),\n\n    nivel_acesso ENUM('admin', 'gerente', 'frentista', 'caixa') NOT NULL,\n\n    ativo BOOLEAN DEFAULT TRUE,\n\n    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\n-- ===============================\n-- TABELA: COMBUSTÍVEIS\n-- ===============================\nCREATE TABLE combustiveis (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n\n    nome VARCHAR(50) NOT NULL,\n    tipo ENUM('gasolina', 'etanol', 'diesel') NOT NULL,\n\n    preco_litro DECIMAL(10,3) NOT NULL,\n\n    ativo BOOLEAN DEFAULT TRUE\n);\n\n-- ===============================\n-- TABELA: VENDAS\n-- ===============================\nCREATE TABLE vendas (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n\n    combustivel_id INT NOT NULL,\n    usuario_id INT NOT NULL,\n\n    litros DECIMAL(10,3) NOT NULL,\n    valor_total DECIMAL(10,2) NOT NULL,\n\n    forma_pagamento ENUM('dinheiro', 'pix', 'debito', 'credito') NOT NULL,\n\n    data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n\n    CONSTRAINT fk_vendas_combustivel\n        FOREIGN KEY (combustivel_id) REFERENCES combustiveis(id),\n\n    CONSTRAINT fk_vendas_usuario\n        FOREIGN KEY (usuario_id) REFERENCES usuarios(id)\n);\n\n-- ===============================\n-- TABELA: CAIXA\n-- ===============================\nCREATE TABLE caixa (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n\n    usuario_id INT NOT NULL,\n    data DATE NOT NULL,\n\n    valor_abertura DECIMAL(10,2) NOT NULL,\n    valor_fechamento DECIMAL(10,2),\n\n    status ENUM('aberto', 'fechado') DEFAULT 'aberto',\n\n    CONSTRAINT fk_caixa_usuario\n        FOREIGN KEY (usuario_id) REFERENCES usuarios(id)\n);\n\n-- ===============================\n-- ÍNDICES (PERFORMANCE)\n-- ===============================\nCREATE INDEX idx_vendas_data ON vendas(data_hora);\nCREATE INDEX idx_vendas_usuario ON vendas(usuario_id);\nCREATE INDEX idx_vendas_combustivel ON vendas(combustivel_id);\n\n-- ===============================\n-- DADOS INICIAIS\n-- ===============================\nINSERT INTO usuarios (usuario, senha, nome, cargo, nivel_acesso)\nVALUES ('admin', 'senha_hash_aqui', 'Administrador', 'Administrador', 'admin');\n\nINSERT INTO combustiveis (nome, tipo, preco_litro)\nVALUES\n('Gasolina Comum', 'gasolina', 5.890),\n('Etanol', 'etanol', 3.790),\n('Diesel S10', 'diesel', 6.190);\n\n",
+    "options": {
+        "tabSize": 4,
+        "insertSpaces": true,
+        "indentSize": 4,
+        "defaultEOL": "CRLF",
+        "trimAutoWhitespace": true
+    },
+    "viewState": {
+        "cursorState": [
+            {
+                "inSelectionMode": true,
+                "selectionStart": {
+                    "lineNumber": 99,
+                    "column": 33
+                },
+                "position": {
+                    "lineNumber": 98,
+                    "column": 29
+                }
+            }
+        ],
+        "viewState": {
+            "scrollLeft": 0,
+            "firstPosition": {
+                "lineNumber": 81,
+                "column": 1
+            },
+            "firstPositionDeltaTop": -4
+        },
+        "contributionsState": {
+            "editor.contrib.folding": {},
+            "editor.contrib.wordHighlighter": false
+        }
+    },
+    "contexts": [
+        {
+            "state": {
+                "start": 1,
+                "end": 1,
+                "language": "mysql",
+                "result": {
+                    "type": "text",
+                    "text": [
+                        {
+                            "type": 2,
+                            "content": "Welcome to the MySQL Shell - DB Notebook.\n\nPress Ctrl+Enter to execute the code block.\n\nExecute \\sql to switch to SQL, \\js to JavaScript and \\ts to TypeScript mode.\nExecute \\help or \\? for help;",
+                            "language": "ansi"
+                        }
+                    ]
+                },
+                "currentHeight": 28,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 6
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": []
+        },
+        {
+            "state": {
+                "start": 2,
+                "end": 100,
+                "language": "mysql",
+                "result": {
+                    "type": "text",
+                    "text": [
+                        {
+                            "type": 2,
+                            "index": 0,
+                            "resultId": "5bf90dae-8bd0-4e5e-e4d7-11e90944051d",
+                            "content": "OK, 1 row affected in 10.39ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 1,
+                            "resultId": "c50cb979-7f8e-46f0-f5de-ab983cb75534",
+                            "content": "OK, 0 records retrieved in 0.894ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 2,
+                            "resultId": "8c548396-3bc8-47f9-a467-7fce83b846a4",
+                            "content": "OK, 0 records retrieved in 58.999ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 3,
+                            "resultId": "37927637-0511-4c9f-83dc-e0619d4b86d1",
+                            "content": "OK, 0 records retrieved in 27.808ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 4,
+                            "resultId": "d30e1ed0-47b2-410c-8d42-9e47c54e023f",
+                            "content": "OK, 0 records retrieved in 52.885ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 5,
+                            "resultId": "9d283fc7-9dfc-4ff7-87ce-aec1ef4f7f8c",
+                            "content": "OK, 0 records retrieved in 44.67ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 6,
+                            "resultId": "c692e916-e94c-4eff-beca-458d50313b3b",
+                            "content": "OK, 0 records retrieved in 26.72ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 7,
+                            "resultId": "f314da9a-8792-44c8-eb9a-c96cdf8de262",
+                            "content": "OK, 0 records retrieved in 21.638ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 8,
+                            "resultId": "bb39539e-634a-4861-e55e-574511c1d53f",
+                            "content": "OK, 0 records retrieved in 20.711ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 9,
+                            "resultId": "88a58360-9f12-4997-ffa0-0ebac9cebda8",
+                            "content": "OK, 1 row affected in 12.211ms"
+                        },
+                        {
+                            "type": 2,
+                            "index": 10,
+                            "resultId": "7353a657-d7c4-42c5-ac12-b0cc938893fe",
+                            "content": "OK, 3 rows affected in 14.171ms"
+                        }
+                    ]
+                },
+                "currentHeight": 239,
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 150
+                        },
+                        "contentStart": 99,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 150,
+                            "length": 26
+                        },
+                        "contentStart": 151,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 176,
+                            "length": 447
+                        },
+                        "contentStart": 268,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 623,
+                            "length": 326
+                        },
+                        "contentStart": 719,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 949,
+                            "length": 615
+                        },
+                        "contentStart": 1039,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 1564,
+                            "length": 431
+                        },
+                        "contentStart": 1653,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 1995,
+                            "length": 147
+                        },
+                        "contentStart": 2092,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 2142,
+                            "length": 55
+                        },
+                        "contentStart": 2143,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 2197,
+                            "length": 63
+                        },
+                        "contentStart": 2198,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 2260,
+                            "length": 234
+                        },
+                        "contentStart": 2350,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 2494,
+                            "length": 160
+                        },
+                        "contentStart": 2496,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 2654,
+                            "length": 1
+                        },
+                        "contentStart": 2653,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": []
+        },
+        {
+            "state": {
+                "start": 101,
+                "end": 101,
+                "language": "mysql",
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 0
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": []
+        }
+    ]
+}
