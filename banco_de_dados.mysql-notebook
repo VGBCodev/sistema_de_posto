@@ -2,7 +2,7 @@
     "type": "MySQLNotebook",
     "version": "1.0",
     "caption": "DB Notebook",
-    "content": "-- =========================================\n-- BANCO DE DADOS: POSTO DE COMBUSTÍVEL\n-- =========================================\n\nCREATE DATABASE IF NOT EXISTS posto_de_combustivel;\nUSE posto_de_combustivel;\n\n-- =========================================\n-- TABELA: USUARIOS\n-- =========================================\nCREATE TABLE IF NOT EXISTS usuarios (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n    usuario VARCHAR(50) NOT NULL UNIQUE,\n    senha VARCHAR(255) NOT NULL,\n    nome VARCHAR(100) NOT NULL,\n    cargo VARCHAR(50),\n    nivel_acesso ENUM('admin', 'gerente', 'frentista', 'caixa') NOT NULL,\n    ativo BOOLEAN DEFAULT TRUE,\n    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\n-- =========================================\n-- TABELA: COMBUSTIVEIS\n-- =========================================\nCREATE TABLE IF NOT EXISTS combustiveis (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n    nome VARCHAR(50) NOT NULL,\n    tipo ENUM('gasolina', 'etanol', 'diesel') NOT NULL,\n    preco_litro DECIMAL(10,3) NOT NULL,\n    ativo BOOLEAN DEFAULT TRUE\n);\n\n-- =========================================\n-- TABELA: VENDAS\n-- =========================================\nCREATE TABLE IF NOT EXISTS vendas (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n    combustivel_id INT NOT NULL,\n    usuario_id INT NOT NULL,\n    litros DECIMAL(10,3) NOT NULL,\n    valor_total DECIMAL(10,2) NOT NULL,\n    forma_pagamento ENUM('dinheiro', 'pix', 'debito', 'credito') NOT NULL,\n    data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    FOREIGN KEY (combustivel_id) REFERENCES combustiveis(id),\n    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)\n);\n\n-- =========================================\n-- TABELA: CAIXA\n-- =========================================\nCREATE TABLE IF NOT EXISTS caixa (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n    usuario_id INT NOT NULL,\n    data DATE NOT NULL,\n    valor_abertura DECIMAL(10,2) NOT NULL,\n    valor_fechamento DECIMAL(10,2),\n    status ENUM('aberto', 'fechado') DEFAULT 'aberto',\n    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)\n);\n\n-- =========================================\n-- ÍNDICES (VERIFICA ANTES DE CRIAR)\n-- =========================================\nSET @existe := (\n    SELECT COUNT(1)\n    FROM information_schema.statistics\n    WHERE table_schema = DATABASE()\n      AND table_name = 'vendas'\n      AND index_name = 'idx_vendas_data'\n);\nSET @sql := IF(@existe = 0,\n    'CREATE INDEX idx_vendas_data ON vendas(data_hora)',\n    'SELECT 1'\n);\nPREPARE stmt FROM @sql;\nEXECUTE stmt;\nDEALLOCATE PREPARE stmt;\n\nSET @existe := (\n    SELECT COUNT(1)\n    FROM information_schema.statistics\n    WHERE table_schema = DATABASE()\n      AND table_name = 'vendas'\n      AND index_name = 'idx_vendas_usuario'\n);\nSET @sql := IF(@existe = 0,\n    'CREATE INDEX idx_vendas_usuario ON vendas(usuario_id)',\n    'SELECT 1'\n);\nPREPARE stmt FROM @sql;\nEXECUTE stmt;\nDEALLOCATE PREPARE stmt;\n\nSET @existe := (\n    SELECT COUNT(1)\n    FROM information_schema.statistics\n    WHERE table_schema = DATABASE()\n      AND table_name = 'vendas'\n      AND index_name = 'idx_vendas_combustivel'\n);\nSET @sql := IF(@existe = 0,\n    'CREATE INDEX idx_vendas_combustivel ON vendas(combustivel_id)',\n    'SELECT 1'\n);\nPREPARE stmt FROM @sql;\nEXECUTE stmt;\nDEALLOCATE PREPARE stmt;\n\n-- =========================================\n-- DADOS INICIAIS\n-- =========================================\nINSERT IGNORE INTO usuarios (usuario, senha, nome, cargo, nivel_acesso)\nVALUES (\n    'admin',\n    '$2b$10$hash_exemplo_trocar_no_node',\n    'Administrador',\n    'Administrador',\n    'admin'\n);\n\nINSERT IGNORE INTO combustiveis (id, nome, tipo, preco_litro) VALUES\n(1, 'Gasolina Comum', 'gasolina', 5.890),\n(2, 'Etanol', 'etanol', 3.790),\n(3, 'Diesel S10', 'diesel', 6.190);\n\nUPDATE usuarios\nSET senha = '$2b$10$4L44M288kFRNOffJ91BIfO810hoy4LuywcoR8myb7L741K300KXbG'\nWHERE usuario = 'admin';\n",
+    "content": "-- =========================================\n-- BANCO DE DADOS: POSTO DE COMBUSTÍVEL\n-- =========================================\n\nCREATE DATABASE IF NOT EXISTS posto_de_combustivel;\nUSE posto_de_combustivel;\n\n-- =========================================\n-- TABELA: USUARIOS\n-- =========================================\nCREATE TABLE IF NOT EXISTS usuarios (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n    usuario VARCHAR(50) NOT NULL UNIQUE,\n    senha VARCHAR(255) NOT NULL,\n    nome VARCHAR(100) NOT NULL,\n    cargo VARCHAR(50),\n    nivel_acesso ENUM('admin', 'gerente', 'frentista', 'caixa') NOT NULL,\n    ativo BOOLEAN DEFAULT TRUE,\n    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\n-- =========================================\n-- TABELA: COMBUSTIVEIS\n-- =========================================\nCREATE TABLE IF NOT EXISTS combustiveis (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n    nome VARCHAR(50) NOT NULL,\n    tipo ENUM('gasolina', 'etanol', 'diesel') NOT NULL,\n    preco_litro DECIMAL(10,3) NOT NULL,\n    ativo BOOLEAN DEFAULT TRUE\n);\n\n-- =========================================\n-- TABELA: VENDAS\n-- =========================================\nCREATE TABLE IF NOT EXISTS vendas (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n    combustivel_id INT NOT NULL,\n    usuario_id INT NOT NULL,\n    litros DECIMAL(10,3) NOT NULL,\n    valor_total DECIMAL(10,2) NOT NULL,\n    forma_pagamento ENUM('dinheiro', 'pix', 'debito', 'credito') NOT NULL,\n    data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    FOREIGN KEY (combustivel_id) REFERENCES combustiveis(id),\n    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),\n    caixa_id INT NOT NULL,\n    caixa_id INT NOT NULL\n);\n\n-- =========================================\n-- TABELA: CAIXA\n-- =========================================\nCREATE TABLE IF NOT EXISTS caixa (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n    usuario_id INT NOT NULL,\n    data DATE NOT NULL,\n    valor_abertura DECIMAL(10,2) NOT NULL,\n    valor_fechamento DECIMAL(10,2),\n    status ENUM('aberto', 'fechado') DEFAULT 'aberto',\n    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)\n);\n\n-- =========================================\n-- ÍNDICES (VERIFICA ANTES DE CRIAR)\n-- =========================================\nSET @existe := (\n    SELECT COUNT(1)\n    FROM information_schema.statistics\n    WHERE table_schema = DATABASE()\n      AND table_name = 'vendas'\n      AND index_name = 'idx_vendas_data'\n);\nSET @sql := IF(@existe = 0,\n    'CREATE INDEX idx_vendas_data ON vendas(data_hora)',\n    'SELECT 1'\n);\nPREPARE stmt FROM @sql;\nEXECUTE stmt;\nDEALLOCATE PREPARE stmt;\n\nSET @existe := (\n    SELECT COUNT(1)\n    FROM information_schema.statistics\n    WHERE table_schema = DATABASE()\n      AND table_name = 'vendas'\n      AND index_name = 'idx_vendas_usuario'\n);\nSET @sql := IF(@existe = 0,\n    'CREATE INDEX idx_vendas_usuario ON vendas(usuario_id)',\n    'SELECT 1'\n);\nPREPARE stmt FROM @sql;\nEXECUTE stmt;\nDEALLOCATE PREPARE stmt;\n\nSET @existe := (\n    SELECT COUNT(1)\n    FROM information_schema.statistics\n    WHERE table_schema = DATABASE()\n      AND table_name = 'vendas'\n      AND index_name = 'idx_vendas_combustivel'\n);\nSET @sql := IF(@existe = 0,\n    'CREATE INDEX idx_vendas_combustivel ON vendas(combustivel_id)',\n    'SELECT 1'\n);\nPREPARE stmt FROM @sql;\nEXECUTE stmt;\nDEALLOCATE PREPARE stmt;\n\n-- =========================================\n-- DADOS INICIAIS\n-- =========================================\nINSERT IGNORE INTO usuarios (usuario, senha, nome, cargo, nivel_acesso)\nVALUES (\n    'admin',\n    '$2b$10$hash_exemplo_trocar_no_node',\n    'Administrador',\n    'Administrador',\n    'admin'\n);\n\nINSERT IGNORE INTO combustiveis (id, nome, tipo, preco_litro) VALUES\n(1, 'Gasolina Comum', 'gasolina', 5.890),\n(2, 'Etanol', 'etanol', 3.790),\n(3, 'Diesel S10', 'diesel', 6.190);\n\nUPDATE usuarios\nSET senha = '$2b$10$4L44M288kFRNOffJ91BIfO810hoy4LuywcoR8myb7L741K300KXbG'\nWHERE usuario = 'admin';\n\nSELECT id, nome, ativo FROM combustiveis;\n\nALTER TABLE vendas\nADD COLUMN caixa_id INT NOT NULL AFTER usuario_id,\nADD CONSTRAINT fk_vendas_caixa\nFOREIGN KEY (caixa_id) REFERENCES caixa(id);\n\n\n\n",
     "options": {
         "tabSize": 4,
         "insertSpaces": true,
@@ -15,11 +15,11 @@
             {
                 "inSelectionMode": false,
                 "selectionStart": {
-                    "lineNumber": 129,
+                    "lineNumber": 138,
                     "column": 1
                 },
                 "position": {
-                    "lineNumber": 129,
+                    "lineNumber": 138,
                     "column": 1
                 }
             }
@@ -27,10 +27,10 @@
         "viewState": {
             "scrollLeft": 0,
             "firstPosition": {
-                "lineNumber": 101,
+                "lineNumber": 118,
                 "column": 1
             },
-            "firstPositionDeltaTop": -2
+            "firstPositionDeltaTop": -5
         },
         "contributionsState": {
             "editor.contrib.folding": {},
@@ -41,9 +41,39 @@
         {
             "state": {
                 "start": 1,
-                "end": 129,
+                "end": 140,
                 "language": "mysql",
-                "currentSet": 0,
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "b2f7d12d-4634-4a5f-a9cf-1e83238edc3d",
+                        "9bfb4b6f-8ab3-448e-c805-a73e7ff2aae0",
+                        "e0f50d13-49ed-4953-94b5-69e9ff782c58",
+                        "d6bd5adf-bc62-4b18-9f63-97a173a60b6b",
+                        "37eaba7d-5847-4273-9b19-397b3eefafcb",
+                        "2533ef66-c0f7-41cc-dfc0-5a6a0b9a492c",
+                        "45cb6eaf-5e2c-466a-a5bb-477ca9f10d69",
+                        "b3c457ca-af61-4704-ec7a-705dc65a661d",
+                        "0299e469-ae7f-42a6-a560-7326f92f0e62",
+                        "d3efa14c-23cf-487e-bbb5-c5ce94e4520a",
+                        "19b415b2-96a6-4458-a28f-ca5de896c12c",
+                        "f1b95afa-e794-485f-e2c6-f829664850e3",
+                        "85aa8113-63b4-4027-d6a1-4ec13d7ab14d",
+                        "5ed2f91c-7c2a-4982-d73c-c5ad63c85709",
+                        "aef72d71-c365-48f9-9276-be995513547c",
+                        "1f0e22b0-a7dc-45c4-87bc-16e94666e252",
+                        "d0aa5b50-3639-4a02-9d56-13dac257af1b",
+                        "1b552c76-58c5-43f4-f8fd-20900b8cc6f0",
+                        "ca03b8fa-6609-410e-e1c1-f23ce34d26b4",
+                        "5f4cfa31-0312-4ece-fe30-84278e7e7fb6",
+                        "4584e651-6eda-4058-de0c-d024a37e64c1",
+                        "ef9689b5-35da-4982-947a-674c931a70b3",
+                        "c529a273-c84e-40a9-92a7-8b45eeb3feff",
+                        "30dacceb-5b4e-49cc-8f6a-a610bdf2772c"
+                    ]
+                },
+                "currentHeight": 123.109375,
+                "currentSet": 1,
                 "statements": [
                     {
                         "delimiter": ";",
@@ -85,7 +115,7 @@
                         "delimiter": ";",
                         "span": {
                             "start": 1041,
-                            "length": 565
+                            "length": 619
                         },
                         "contentStart": 1151,
                         "state": 0
@@ -93,182 +123,887 @@
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 1606,
+                            "start": 1660,
                             "length": 425
                         },
-                        "contentStart": 1715,
+                        "contentStart": 1769,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 2031,
+                            "start": 2085,
                             "length": 316
                         },
-                        "contentStart": 2160,
+                        "contentStart": 2214,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 2347,
+                            "start": 2401,
                             "length": 103
                         },
-                        "contentStart": 2348,
+                        "contentStart": 2402,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 2450,
+                            "start": 2504,
                             "length": 24
                         },
-                        "contentStart": 2451,
+                        "contentStart": 2505,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 2474,
+                            "start": 2528,
                             "length": 14
                         },
-                        "contentStart": 2475,
+                        "contentStart": 2529,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 2488,
+                            "start": 2542,
                             "length": 25
                         },
-                        "contentStart": 2490,
+                        "contentStart": 2544,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 2513,
+                            "start": 2567,
                             "length": 192
                         },
-                        "contentStart": 2515,
+                        "contentStart": 2569,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 2705,
+                            "start": 2759,
                             "length": 107
                         },
-                        "contentStart": 2706,
+                        "contentStart": 2760,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 2812,
+                            "start": 2866,
                             "length": 24
                         },
-                        "contentStart": 2813,
+                        "contentStart": 2867,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 2836,
+                            "start": 2890,
                             "length": 14
                         },
-                        "contentStart": 2837,
+                        "contentStart": 2891,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 2850,
+                            "start": 2904,
                             "length": 25
                         },
-                        "contentStart": 2852,
+                        "contentStart": 2906,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 2875,
+                            "start": 2929,
                             "length": 196
                         },
-                        "contentStart": 2877,
+                        "contentStart": 2931,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 3071,
+                            "start": 3125,
                             "length": 115
                         },
-                        "contentStart": 3072,
+                        "contentStart": 3126,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 3186,
+                            "start": 3240,
                             "length": 24
                         },
-                        "contentStart": 3187,
+                        "contentStart": 3241,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 3210,
+                            "start": 3264,
                             "length": 14
                         },
-                        "contentStart": 3211,
+                        "contentStart": 3265,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 3224,
+                            "start": 3278,
                             "length": 25
                         },
-                        "contentStart": 3226,
+                        "contentStart": 3280,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 3249,
+                            "start": 3303,
                             "length": 302
                         },
-                        "contentStart": 3359,
+                        "contentStart": 3413,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 3551,
+                            "start": 3605,
                             "length": 180
                         },
-                        "contentStart": 3553,
+                        "contentStart": 3607,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 3731,
+                            "start": 3785,
                             "length": 117
                         },
-                        "contentStart": 3733,
+                        "contentStart": 3787,
                         "state": 0
                     },
                     {
                         "delimiter": ";",
                         "span": {
-                            "start": 3848,
-                            "length": 1
+                            "start": 3902,
+                            "length": 43
                         },
-                        "contentStart": 3847,
+                        "contentStart": 3904,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 3945,
+                            "length": 147
+                        },
+                        "contentStart": 3947,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 4092,
+                            "length": 3
+                        },
+                        "contentStart": 4091,
                         "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "b2f7d12d-4634-4a5f-a9cf-1e83238edc3d",
+                    "rows": [
+                        {
+                            "0": 1
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "1",
+                            "field": "0",
+                            "dataType": {
+                                "type": 4,
+                                "flags": [
+                                    "SIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 10,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INTEGER",
+                                    "INT4"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 1 record retrieved in 0.601ms"
+                    },
+                    "totalRowCount": 1,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 9,
+                    "sql": "\nEXECUTE stmt",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "9bfb4b6f-8ab3-448e-c805-a73e7ff2aae0",
+                    "rows": [
+                        {
+                            "0": 1
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "1",
+                            "field": "0",
+                            "dataType": {
+                                "type": 4,
+                                "flags": [
+                                    "SIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 10,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INTEGER",
+                                    "INT4"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 1 record retrieved in 0.709ms"
+                    },
+                    "totalRowCount": 1,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 14,
+                    "sql": "\nEXECUTE stmt",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "e0f50d13-49ed-4953-94b5-69e9ff782c58",
+                    "rows": [
+                        {
+                            "0": 1
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "1",
+                            "field": "0",
+                            "dataType": {
+                                "type": 4,
+                                "flags": [
+                                    "SIGNED",
+                                    "ZEROFILL"
+                                ],
+                                "numericPrecision": 10,
+                                "parameterFormatType": "OneOrZero",
+                                "synonyms": [
+                                    "INTEGER",
+                                    "INT4"
+                                ]
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 1 record retrieved in 0.705ms"
+                    },
+                    "totalRowCount": 1,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 19,
+                    "sql": "\nEXECUTE stmt",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "d6bd5adf-bc62-4b18-9f63-97a173a60b6b",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 1 row affected in 5.109ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "-- =========================================\n-- BANCO DE DADOS: POSTO DE COMBUSTÍVEL\n-- =========================================\n\nCREATE DATABASE IF NOT EXISTS posto_de_combustivel",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "37eaba7d-5847-4273-9b19-397b3eefafcb",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 0.825ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 1,
+                    "sql": "\nUSE posto_de_combustivel",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "2533ef66-c0f7-41cc-dfc0-5a6a0b9a492c",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 5.761ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 2,
+                    "sql": "\n\n-- =========================================\n-- TABELA: USUARIOS\n-- =========================================\nCREATE TABLE IF NOT EXISTS usuarios (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n    usuario VARCHAR(50) NOT NULL UNIQUE,\n    senha VARCHAR(255) NOT NULL,\n    nome VARCHAR(100) NOT NULL,\n    cargo VARCHAR(50),\n    nivel_acesso ENUM('admin', 'gerente', 'frentista', 'caixa') NOT NULL,\n    ativo BOOLEAN DEFAULT TRUE,\n    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n)",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "45cb6eaf-5e2c-466a-a5bb-477ca9f10d69",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 3.958ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 3,
+                    "sql": "\n\n-- =========================================\n-- TABELA: COMBUSTIVEIS\n-- =========================================\nCREATE TABLE IF NOT EXISTS combustiveis (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n    nome VARCHAR(50) NOT NULL,\n    tipo ENUM('gasolina', 'etanol', 'diesel') NOT NULL,\n    preco_litro DECIMAL(10,3) NOT NULL,\n    ativo BOOLEAN DEFAULT TRUE\n)",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "b3c457ca-af61-4704-ec7a-705dc65a661d",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 4.616ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 4,
+                    "sql": "\n\n-- =========================================\n-- TABELA: VENDAS\n-- =========================================\nCREATE TABLE IF NOT EXISTS vendas (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n    combustivel_id INT NOT NULL,\n    usuario_id INT NOT NULL,\n    litros DECIMAL(10,3) NOT NULL,\n    valor_total DECIMAL(10,2) NOT NULL,\n    forma_pagamento ENUM('dinheiro', 'pix', 'debito', 'credito') NOT NULL,\n    data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    FOREIGN KEY (combustivel_id) REFERENCES combustiveis(id),\n    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),\n    caixa_id INT NOT NULL,\n    caixa_id INT NOT NULL\n)",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "0299e469-ae7f-42a6-a560-7326f92f0e62",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 4.575ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 5,
+                    "sql": "\n\n-- =========================================\n-- TABELA: CAIXA\n-- =========================================\nCREATE TABLE IF NOT EXISTS caixa (\n    id INT AUTO_INCREMENT PRIMARY KEY,\n    usuario_id INT NOT NULL,\n    data DATE NOT NULL,\n    valor_abertura DECIMAL(10,2) NOT NULL,\n    valor_fechamento DECIMAL(10,2),\n    status ENUM('aberto', 'fechado') DEFAULT 'aberto',\n    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)\n)",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "d3efa14c-23cf-487e-bbb5-c5ce94e4520a",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 3.913ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 6,
+                    "sql": "\n\n-- =========================================\n-- ÍNDICES (VERIFICA ANTES DE CRIAR)\n-- =========================================\nSET @existe := (\n    SELECT COUNT(1)\n    FROM information_schema.statistics\n    WHERE table_schema = DATABASE()\n      AND table_name = 'vendas'\n      AND index_name = 'idx_vendas_data'\n)",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "19b415b2-96a6-4458-a28f-ca5de896c12c",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 0.451ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 7,
+                    "sql": "\nSET @sql := IF(@existe = 0,\n    'CREATE INDEX idx_vendas_data ON vendas(data_hora)',\n    'SELECT 1'\n)",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "f1b95afa-e794-485f-e2c6-f829664850e3",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 0.737ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 8,
+                    "sql": "\nPREPARE stmt FROM @sql",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "85aa8113-63b4-4027-d6a1-4ec13d7ab14d",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 0.751ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 10,
+                    "sql": "\nDEALLOCATE PREPARE stmt",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "5ed2f91c-7c2a-4982-d73c-c5ad63c85709",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 1.826ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 11,
+                    "sql": "\n\nSET @existe := (\n    SELECT COUNT(1)\n    FROM information_schema.statistics\n    WHERE table_schema = DATABASE()\n      AND table_name = 'vendas'\n      AND index_name = 'idx_vendas_usuario'\n)",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "aef72d71-c365-48f9-9276-be995513547c",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 0.467ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 12,
+                    "sql": "\nSET @sql := IF(@existe = 0,\n    'CREATE INDEX idx_vendas_usuario ON vendas(usuario_id)',\n    'SELECT 1'\n)",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "1f0e22b0-a7dc-45c4-87bc-16e94666e252",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 0.562ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 13,
+                    "sql": "\nPREPARE stmt FROM @sql",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "d0aa5b50-3639-4a02-9d56-13dac257af1b",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 0.524ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 15,
+                    "sql": "\nDEALLOCATE PREPARE stmt",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "1b552c76-58c5-43f4-f8fd-20900b8cc6f0",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 1.791ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 16,
+                    "sql": "\n\nSET @existe := (\n    SELECT COUNT(1)\n    FROM information_schema.statistics\n    WHERE table_schema = DATABASE()\n      AND table_name = 'vendas'\n      AND index_name = 'idx_vendas_combustivel'\n)",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "ca03b8fa-6609-410e-e1c1-f23ce34d26b4",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 0.621ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 17,
+                    "sql": "\nSET @sql := IF(@existe = 0,\n    'CREATE INDEX idx_vendas_combustivel ON vendas(combustivel_id)',\n    'SELECT 1'\n)",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "5f4cfa31-0312-4ece-fe30-84278e7e7fb6",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 0.495ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 18,
+                    "sql": "\nPREPARE stmt FROM @sql",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "4584e651-6eda-4058-de0c-d024a37e64c1",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 0.701ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 20,
+                    "sql": "\nDEALLOCATE PREPARE stmt",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "ef9689b5-35da-4982-947a-674c931a70b3",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 4.853ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 21,
+                    "sql": "\n\n-- =========================================\n-- DADOS INICIAIS\n-- =========================================\nINSERT IGNORE INTO usuarios (usuario, senha, nome, cargo, nivel_acesso)\nVALUES (\n    'admin',\n    '$2b$10$hash_exemplo_trocar_no_node',\n    'Administrador',\n    'Administrador',\n    'admin'\n)",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "c529a273-c84e-40a9-92a7-8b45eeb3feff",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 1.021ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 22,
+                    "sql": "\n\nINSERT IGNORE INTO combustiveis (id, nome, tipo, preco_litro) VALUES\n(1, 'Gasolina Comum', 'gasolina', 5.890),\n(2, 'Etanol', 'etanol', 3.790),\n(3, 'Diesel S10', 'diesel', 6.190)",
+                    "updatable": false
+                },
+                {
+                    "tabId": "122aefdd-d5a1-49fa-d9b7-6d00566b74a3",
+                    "resultId": "30dacceb-5b4e-49cc-8f6a-a610bdf2772c",
+                    "rows": [],
+                    "columns": [
+                        {
+                            "title": "*",
+                            "field": "0",
+                            "dataType": {
+                                "type": 0
+                            },
+                            "inPK": false,
+                            "nullable": false,
+                            "autoIncrement": false
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 0 records retrieved in 0.779ms"
+                    },
+                    "totalRowCount": 0,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 23,
+                    "sql": "\n\nUPDATE usuarios\nSET senha = '$2b$10$4L44M288kFRNOffJ91BIfO810hoy4LuywcoR8myb7L741K300KXbG'\nWHERE usuario = 'admin'",
+                    "updatable": false
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 141,
+                "end": 141,
+                "language": "mysql",
+                "currentSet": 1,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 0
+                        },
+                        "contentStart": 0,
+                        "state": 0
                     }
                 ]
             },

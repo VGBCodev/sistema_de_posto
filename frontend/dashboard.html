@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Sistema do Posto</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="topbar">
+    <span id="usuarioLogado">Usuário</span>
+    <button onclick="logout()">Sair</button>
+  </div>
+
+  <div class="container">
+    <aside class="menu">
+      <button onclick="abrirTela('caixa')">💰 Caixa</button>
+      <button onclick="abrirTela('vendas')">🧾 Vendas</button>
+      <button onclick="abrirTela('combustiveis')">⛽ Combustíveis</button>
+    </aside>
+
+    <main class="conteudo" id="conteudo">
+      <h2>Bem-vindo ao Sistema do Posto</h2>
+      <p>Selecione uma opção no menu</p>
+    </main>
+  </div>
+
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

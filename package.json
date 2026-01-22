@@ -1,10 +1,12 @@
 {
   "name": "sistema_de_posto",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Sistema de Posto de Combustível Desktop",
+  "main": "electron/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "desktop": "electron ."
   },
   "repository": {
     "type": "git",
@@ -25,6 +27,8 @@
     "mysql2": "^3.16.1"
   },
   "devDependencies": {
+    "electron": "^40.0.0",
+    "electron-builder": "^26.4.0",
     "nodemon": "^3.1.11"
   }
 }
